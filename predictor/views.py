@@ -15,9 +15,9 @@ from scraper.views import houseScraper
 from cleansor.views import featPrep
 
 def predictor(request):
-    for_sale_house = request.GET['for_sale_house']
+    house_link = request.GET['for_sale_house']
 
-    house_info = houseScraper(for_sale_house)
+    house_info = houseScraper(house_link)
     house_feat = featPrep(house_info)
 
     # training model with feat_all
@@ -29,9 +29,7 @@ def predictor(request):
     cph_time.fit(feat_all, duration_col='days', event_col='sold', show_progress=True)
 
     # prediction
-    # # TODO: each house prediction. tested on jupyter
     uncon_time = cph_time.predict_survival_function(house_feat)
-    time_life = uncon_time.apply(lambda c: (c / c.loc[feat_all.loc[c.name, 'sold']]).clip_upper(1))
 
     time_pred_50 = median_survival_times(time_life)
     time_pred_75 = qth_survival_times(0.25, time_life)
@@ -41,7 +39,6 @@ def predictor(request):
     cph_off.fit(feat_all, duration_col='discount', event_col='sold', show_progress=True)
 
     # prediction on time
-    # # TODO: each house prediction. tested on jupyter
     uncon_off = cph_off.predict_survival_function(house_feat)
     # off_life = uncon_off.apply(lambda c: (c / c.loc[feat_all.loc[c.name, 'sold']]).clip_upper(1))
 
@@ -49,6 +46,11 @@ def predictor(request):
     off_pred_75 = qth_survival_times(0.25, uncon_off)
 
     response_dict = {
+        #TODO: print out house basic info address, price, days on market
+
+
+
+
         'time_pred_50': time_pred_50,
         'time_pred_75': time_pred_75,
 

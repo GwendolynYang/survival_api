@@ -2,4 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 
-def featPrep()
+def featPrep(houseraw):
+
+    # TODO: now just basic raw to features, may need more features
+

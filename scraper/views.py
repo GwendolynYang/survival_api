@@ -20,7 +20,10 @@ def houseScraper(weblink):
     curr_price = get_currprice(soup)
     days_listing = get_dayslisting(soup)
 
-    row = [address, city, curr_price, days_listing]
+    raw = [address, city, curr_price, days_listing]
+    #TODO:
+    # may need to extract more features for testing purpose.
+    return raw
 
 
 def get_addr(soup):
@@ -64,5 +67,5 @@ def get_dayslisting(soup):
     for obj in block.find_all("li"):
         items =  obj.get_text.strip().split(' ')
         if items[1:] == ['Days', 'on', 'Trulia']:
-            #return int(items[0])
-        return items # again, here return original datacoō
+        # return int(items[0])
+        return items # again, here return original data in string
