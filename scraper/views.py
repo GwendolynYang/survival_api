@@ -22,7 +22,8 @@ def houseScraper(weblink):
 
     raw = [address, city, curr_price, days_listing]
     #TODO:
-    # may need to extract more features for testing purpose.
+    # Price history is required. Month and date required
+    # Listing event counting required
     return raw
 
 
@@ -50,7 +51,7 @@ def get_city(soup):
 def get_currprice(soup):
     obj = soup.find("h3", id="on-market-price-details")
     if obj is None:
-        curr_price  = np.nan
+        curr_price = np.nan
     else:
         curr_price = obj.get_text()
         return curr_price
@@ -65,7 +66,6 @@ def get_dayslisting(soup):
     block = soup.find('ul', id='home-features')
 
     for obj in block.find_all("li"):
-        items =  obj.get_text.strip().split(' ')
+        items = obj.get_text.strip().split(' ')
         if items[1:] == ['Days', 'on', 'Trulia']:
-        # return int(items[0])
-        return items # again, here return original data in string
+            return int(items[0])  # here returns a integer

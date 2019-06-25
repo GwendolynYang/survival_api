@@ -31,8 +31,8 @@ def predictor(request):
     # prediction
     uncon_time = cph_time.predict_survival_function(house_feat)
 
-    time_pred_50 = median_survival_times(time_life)
-    time_pred_75 = qth_survival_times(0.25, time_life)
+    time_pred_50 = median_survival_times(uncon_time)
+    time_pred_75 = qth_survival_times(0.25, uncon_time)
 
     # fitting model on discount
     cph_off = CoxPHFitter()
