@@ -20,6 +20,8 @@ def houseScraper(weblink):
     curr_price = get_currprice(soup)
     days_listing = get_dayslisting(soup)
 
+    row = [address, city, curr_price, days_listing]
+
 
 def get_addr(soup):
     obj = soup.find("span", class_="Text__TextBase-sc-1cait9d-0 dhOdUy")
@@ -48,9 +50,11 @@ def get_currprice(soup):
         curr_price  = np.nan
     else:
         curr_price = obj.get_text()
-        curr_price.replace(',', '').replace('$', '')
+        return curr_price
 
-        return int(curr_price)
+# output strings. deal with number types later in 'cleansor'
+        # curr_price.replace(',', '').replace('$', '')
+        # return int(curr_price)
 
 
 def get_dayslisting(soup):
@@ -60,4 +64,5 @@ def get_dayslisting(soup):
     for obj in block.find_all("li"):
         items =  obj.get_text.strip().split(' ')
         if items[1:] == ['Days', 'on', 'Trulia']:
-            return int(items[0])
+            #return int(items[0])
+        return items # again, here return original datacoō
