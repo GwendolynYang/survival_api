@@ -8,10 +8,10 @@ import time
 
 def houseScraper(weblink):
 
-    url = weblink
+    #url = "https://www.trulia.com/p/nj/short-hills/26-campbell-rd-short-hills-nj-07078--2006164351"
 
     headers = {'User-Agent': 'Chrome/56.0.2661.102'}
-    page = requests.session().get(url, headers=headers)
+    page = requests.session().get(weblink, headers=headers)
 
     soup = BeautifulSoup(page.text, 'html.parser')
 
@@ -20,7 +20,7 @@ def houseScraper(weblink):
     curr_price = get_currprice(soup)
     days_listing = get_dayslisting(soup)
 
-    raw = [address, city, curr_price, days_listing]
+    raw = "[address, city, curr_price, days_listing]"
     #TODO:
     # Price history is required. Month and date required
     # Listing event counting required
