@@ -5,5 +5,5 @@ from django.conf.urls import url
 from predictor.views import predictor
 
 urlpatterns = [
-    url('', predictor, name='weblink'),
+    url(' ', predictor, name='weblink'),
 ]

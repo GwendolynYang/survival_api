@@ -26,5 +26,5 @@ urlpatterns = [
 
 urlpatterns += [
     #url(' ', predictor, name='weblink'),
-    url('for_sale/', include('predictor.urls')),
+    url(r'^for_sale/$', predictor, name='for_sale'),
 ]

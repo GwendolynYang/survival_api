@@ -6,6 +6,7 @@
 
 from django.http import HttpResponse
 import json
+import math
 import pandas as pd
 import numpy as np
 from lifelines import CoxPHFitter
@@ -15,19 +16,22 @@ from scraper.views import houseScraper
 from cleansor.views import featPrep
 
 def predictor(request):
-    #url= "https://www.trulia.com/p/nj/short-hills/26-campbell-rd-short-hills-nj-07078--2006164351"
-    house_link = request.GET['for_sale']
-    print(house_link)
+    #url = "https://www.trulia.com/p/nj/short-hills/26-campbell-rd-short-hills-nj-07078--2006164351"
+    house_link = request.GET['weblink']
+    #print(house_link)
+
     #house_link = "https://www.trulia.com/p/nj/short-hills/26-campbell-rd-short-hills-nj-07078--2006164351"
+    #
+    print(house_link)
+    feat = houseScraper(house_link)
 
 
-    house_info = houseScraper(house_link)
-    house_feat = featPrep(house_info)
-
+    # house_feat = featPrep(house_info)
+    #
     # # check if get a validate address:
     # if house_feat[0] is not None:
     #     logflag = True
-    #
+
     # # training model with feat_all
     # if 'address' in feat_all.columns:
     #     feat_all.drop(['address'], axis=1, inplace=True)
@@ -53,38 +57,28 @@ def predictor(request):
     # off_pred_50 = median_survival_times(uncon_off)
     # off_pred_75 = qth_survival_times(0.25, uncon_off)
 
-    # response_dict = {
-    #     #TODO: print out house basic info address, price, days on market
-    #     "log": logflag,
-    #
-    #     "address": house_info[0],
-    #     "city": house_info[1],
-    #
-    #     "curr_price": house_info[2],
-    #     "days": house_info[3],
-    #
-    #     'time_pred_50': time_pred_50,
-    #     'time_pred_75': time_pred_75,
-    #
-    #     'off_pred_50': off_pred_50,
-    #     'off_pred_75': off_pred_75,
-    # }
 
+
+    dom_w = math.ceil(feat['days']/7)
     response_dict = {
         #TODO: print out house basic info address, price, days on market
         "log": True,
 
-        "address": "SomeHouseAddress",
-        "city": "07029",
+        "prediction":
+            {
+                "address": feat['address'],
 
-        "curr_price": "$1,024,000",
-        "days": "10 Weeks",
+                "dom": dom_w,
 
         'time_pred_50': "no use",
-        'time_pred_75': "15 weeks",
+        'days': "15 weeks",
 
         'off_pred_50': "no use 2",
         'off_pred_75': "$999,000",
+
+         "off_usd": "$999,000",
+         "off_pct" : "13%"
+         }
     }
 
     response = json.dumps(response_dict)
