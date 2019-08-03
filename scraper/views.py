@@ -1,24 +1,36 @@
 from django.shortcuts import render
 import requests
+import json
 from bs4 import BeautifulSoup
 import pandas as pd
 
-from cleansor.views import featPrep
+from cleaner.views import featPrep
 
 # Create your views here.
 
+
 def houseScraper(weblink):
 
-    url = "https://www.trulia.com/p/nj/short-hills/26-campbell-rd-short-hills-nj-07078--2006164351"
-
-    headers = {'User-Agent': 'Chrome/56.0.2661.102'}
+    headers = {'User-Agent': 'Chrome/75.0.3770.100'}#'Chrome/56.0.2661.102'
     page = requests.session().get(weblink, headers=headers)
+    # print(page.cookies)
 
-    soup = BeautifulSoup(page.text, 'html.parser')
+
+    if not page:
+        print(page.content)
+
+    # maxcount = 10
+    # while (not page) and maxcount:
+    #
+    #     page = requests.session().get(weblink, headers=headers)
+    #     maxcount -= 1
+    #     print("connection issue")
+
+    soup = BeautifulSoup(page.content, 'html.parser')
 
     feat = featPrep(soup)
 
+    print(feat)
+
     return feat
-
-
 

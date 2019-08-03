@@ -1,12 +1,16 @@
 from django.shortcuts import render
 import numpy as np
+import pandas as pd
+#from cleaner.apps import mhv_dict
 # Create your views here.
 
 
 def get_street(soup):
     # get Address
     obj = soup.find("span", class_="Text__TextBase-sc-1cait9d-0 dhOdUy")
-    street = obj.get_text()
+    #obj = soup.find("span", attrs={"data-testid": "home-details-summary-headline"})
+    #print(obj)
+    street = obj.text
 
     return street
 
@@ -15,8 +19,8 @@ def get_city(soup):
     # get city, State, zipcode
     obj = soup.find("span",
                     class_="HomeSummaryShared__CityStateAddress-vqaylf-0 fyHNRA Text__TextBase-sc-1cait9d-0 hUlhgk")
-    city = obj.get_text()
-
+    city = obj.text
+    #print(city)
     return city
 
 
@@ -39,7 +43,7 @@ def get_dom(soup):
 
 def get_price_from_h3(soup):
     """
-    return str
+    return int
 
     Get price from header-3 (h3) in the begining of the page
     Current price. may not be original listing price
@@ -47,16 +51,16 @@ def get_price_from_h3(soup):
 
     obj = soup.find('h3')
 
-    price_str = obj.get_text()
+    price_str = obj.text
 
-    #price = int(price_str.strip('$').replace(',', ''))
+    price = int(price_str.strip('$').replace(',', ''))
 
-    return price_str
+    return price #price_str
 
 
 def get_price_from_history(priceHistory):
     """
-    return str(price), str(date)
+    return int(price), str(date)
     # Get latest listing price
     # If the latest history record is 'sold',
     # then listing price is not in the price history table.
@@ -72,9 +76,9 @@ def get_price_from_history(priceHistory):
         elif row[2] == 'Listed For Sale':
             date = row[0]
             price_str = row[1]
-            #price = int(price_str.strip('$').replace(',', ''))
+            price = int(price_str.strip('$').replace(',', ''))
 
-            return price_str, date
+            return price_str, price, date
 
 
 def get_price_history_2(soup):
@@ -88,7 +92,7 @@ def get_price_history_2(soup):
     objtable = soup.find('div', attrs={"data-testid": "price-history-container"})
 
     priceHistory = []
-    if objtable.find_all('tr') == None:
+    if objtable.find_all('tr') is None:
         priceHistory.append([np.nan, np.nan, np.nan])
     else:
         for tr in objtable.find_all('tr'):
@@ -116,7 +120,7 @@ def get_lotsize(soup):
     for obj in objlist.find_all('li'):
         items = obj.text.strip().split(' ')
         if items[:2] == ['Lot', 'Size:']:
-            print(items)
+            #print(items)
             if items[-1] == 'sqft':
                 lotsize = int(items[2].replace(',', ''))
             if items[-1] == 'acres':
@@ -173,7 +177,7 @@ def get_eventCount(priceHistory):
     return nList, nPC, nSold
 
 
-def get_r2m(price_str, zipcode):
+def get_r2m(price, zipcode):
     """
         return %2f, float.
         median is a global variable, a dictionary
@@ -183,10 +187,15 @@ def get_r2m(price_str, zipcode):
     if zipcode[0] == '0':
         zipcode = zipcode[1:]
 
-    # this should read from a dictionary
-    medianHV = mhv_dict[zipcode]  # median house value of this area
+    mhv = pd.read_csv('./survival_api_data/MedianHomeValue.csv')
 
-    price = int(price_str.strip('$').replace(',', ''))
+    mhv_dict = dict(zip(mhv.zipcode.astype(str), mhv.MedianHomeValue))
+
+    if zipcode in mhv_dict:
+        # this should read from a dictionary
+        medianHV = mhv_dict[zipcode]  # median house value of this area
+    else:
+        medianHV = 950000.0
 
     r2m = round(price / medianHV, 2)
 
@@ -205,7 +214,7 @@ def featPrep(soup):
 
     pH = get_price_history_2(soup)
 
-    listPrice, date = get_price_from_history(pH)
+    price_str, listPrice, date = get_price_from_history(pH)
 
     cPrice = get_price_from_h3(soup)
 
@@ -222,14 +231,20 @@ def featPrep(soup):
     address = street + ', ' + city
 
     if listPrice == 0:
-        price_str = cPrice
+        price = cPrice
+        discount = 0
+    else:
+        price = listPrice
+        discount = round((listPrice-cPrice)/listPrice, 2)
 
-    ratio = get_r2m(price_str, zipcode)
+    ratio = get_r2m(price, zipcode)
 
     feat_dict = {
         "address": address,
-        "days": dom,
-        "price": price_str,
+        "days": dom,        # int
+        "discount": discount,  # float %2f
+        "listingPrice": price_str,
+        "price": price,  # int
         "r2M": ratio,
         "MonthList": mList,
         "MonthSold": mSold,
